@@ -3,16 +3,15 @@ version: '2'
 services:
   web:
     build: web
-    depends_on:
-      - db
     container_name: misp_web
     image: misp:latest
     restart: unless-stopped
     ports:
-      - "80:80"
+      - '443:443'
     volumes:
       - /dev/urandom:/dev/random
       - ${DATA_DIR}/web:/var/www/MISP
+      - ${PWD}/ssl:/etc/ssl/certs
     environment:
       - MYSQL_HOST=${MYSQL_HOST}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
@@ -23,7 +22,11 @@ services:
       - MISP_BASEURL=${MISP_BASEURL}
       - POSTFIX_RELAY_HOST=${POSTFIX_RELAY_HOST}
       - TIMEZONE=${TIMEZONE}
-
+    networks:
+      misp:
+        aliases:
+          - web
+          - misp-web
   db:
     container_name: misp_db
     image: mysql/mysql-server:5.7
@@ -35,3 +38,9 @@ services:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    networks:
+      misp:
+        aliases:
+          - db
+networks:
+  misp:

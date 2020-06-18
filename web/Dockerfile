@@ -107,7 +107,12 @@ RUN cp /var/www/MISP/INSTALL/apache.misp.ubuntu /etc/apache2/sites-available/mis
     a2dissite 000-default && \
     a2ensite misp && \
     a2enmod rewrite && \
-    a2enmod headers
+    a2enmod headers && \
+    a2enmod ssl
+
+# Enable SSL
+RUN sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:443>/g' /etc/apache2/sites-available/misp.conf
+RUN sed -i "/<\/Directory>/a\\\tSSLEngine on\n\tSSLCertificateFile /etc/ssl/certs/misp.crt\n\tSSLCertificateKeyFile /etc/ssl/certs/misp.key" /etc/apache2/sites-available/misp.conf
 
 # MISP base configuration
 RUN sudo -u www-data cp -a /var/www/MISP/app/Config/bootstrap.default.php /var/www/MISP/app/Config/bootstrap.php && \
